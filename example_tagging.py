@@ -5,7 +5,7 @@ from music_tagger_cnn import MusicTaggerCNN
 from music_tagger_crnn import MusicTaggerCRNN
 import audio_processor as ap
 import pdb
-
+import sys
 def sort_result(tags, preds):
     result = zip(tags, preds)
     sorted_result = sorted(result, key=lambda x: x[1], reverse=True)
@@ -27,12 +27,14 @@ def main(net):
     is affected by batch. Use multiple, different data 
     samples together (at least 4) for reliable prediction.'''
 
-    print('Running main() with network: %s and backend: %s' % (net, K._BACKEND))
+    # print('Running main() with network: %s and backend: %s' % (net, K._BACKEND))
     # setting
-    audio_paths = ['data/bensound-cute.mp3',
-                   'data/bensound-actionable.mp3',
-                   'data/bensound-dubstep.mp3',
-                   'data/bensound-thejazzpiano.mp3','data/dangal.mp3']
+    filename="output.txt"
+    audio_paths = []
+    for arg in sys.argv[1:]:
+        audio_paths.append('data/'+arg);
+        print arg
+    open(filename, 'w').close()
     melgram_paths = ['data/bensound-cute.npy',
                      'data/bensound-actionable.npy',
                      'data/bensound-dubstep.npy',
@@ -69,7 +71,7 @@ def main(net):
         model = MusicTaggerCRNN(weights='msd')
     
     # predict the tags like this
-    print('Predicting...')
+    #print('Predicting...')
     start = time.time()
     pred_tags = model.predict(melgrams)
     # print like this...
@@ -77,11 +79,15 @@ def main(net):
     print('Printing top-10 tags for each track...')
     for song_idx, audio_path in enumerate(audio_paths):
         sorted_result = sort_result(tags, pred_tags[song_idx, :].tolist())
-        print(audio_path)
-        print(sorted_result[:5])
-        print(sorted_result[5:10])
-        print(' ')
 
+        print(audio_path)
+        with open(filename,'a') as f:
+            f.write(sorted_result[0][0])
+            f.write('\n')
+            print(sorted_result[0][0])
+        #print(sorted_result[5:10])
+        #print(' ')
+    
     return
 
 if __name__ == '__main__':
